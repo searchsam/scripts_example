@@ -3,17 +3,23 @@
 
 require 'daru'
 require 'mysql2'
+require 'pg'
 require_relative '.credentials'
 
-@client = Mysql2::Client.new(
+@myclient = Mysql2::Client.new(
   host: Credentials::MY_HOST,
   database: Credentials::MY_DB,
   username: Credentials::MY_USER,
   password: Credentials::MY_PASS
 )
 
+@pgconn = PG::Connection.open(
+  dbname: Credentials::PG_DB,
+  user: Credentials::PG_USER
+)
+
 def getQuery(queryIndex)
-  return {
+  {
     0 => 'WITH locations AS ( SELECT id, latitude, longitude, name, created_at, updated_at FROM  neighbourhoods ORDER BY created_at ASC ) SELECT * FROM locations ORDER BY created_at ASC;',
     1 => 'WITH users AS ( SELECT users.id, users.approved_terms_for_examinations, users.auth_token, people.birth_date as birthday, users.current_sign_in_at, users.current_sign_in_ip, users.email, users.encrypted_password, people.last_name, users.last_sign_in_at, users.last_sign_in_ip, people.name, users.passwd_login, users.people_filters, people.phone_number AS phone, people.phone_area_code, users.remember_created_at, users.reset_password_sent_at AS reset_sent_at, users.reset_password_token AS reset_token, users.role, people.is_male AS sex, users.sign_in_count, users.stripe_id, users.stripe_subscription_id, users.created_at, users.updated_at FROM users, people WHERE people.user_id = users.id ORDER BY users.created_at ASC ) SELECT * FROM users ORDER BY created_at ASC;',
     2 => 'SELECT id, has_children AS children, has_credit_card AS credit_card, private_insurance AS insurance, profession, race, neighbourhood_id AS localtion_id, user_id, created_at, updated_at FROM people ORDER BY created_at ASC;',
@@ -35,8 +41,12 @@ def getQuery(queryIndex)
   }[queryIndex]
 end
 
-def getDf(index, tableName)
-  return Daru::DataFrame.new(@client.query(getQuery(index)).to_a)
+def getDf(index)
+  Daru::DataFrame.new(@myclient.query(getQuery(index)).to_a)
+end
+
+def copyToDB(table)
+  @pgconn.exec("COPY #{table} FROM '#{table}.csv' DELIMITER ", ' CSV HEADER;')
 end
 
 if __FILE__ == $PROGRAM_NAME
@@ -62,7 +72,9 @@ if __FILE__ == $PROGRAM_NAME
   }
 
   tables.each do |index, table|
-    df = getDf(index, table)
-    puts df.first(2)
+    df = getDf(index)
+    df.write_csv("#{table}.csv")
+    copyToDB(table)
+    File.delete("#{table}.csv") if File.exist?("#{table}.csv")
   end
 end
