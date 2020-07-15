@@ -61,8 +61,8 @@ if __FILE__ == $PROGRAM_NAME
     17 => 'nutrimind_tests'
   }
 
-  tables.each { |index, table| do
+  tables.each do |index, table|
     df = getDf(index, table)
     puts df.first(2)
-  }
+  end
 end
