@@ -46,7 +46,7 @@ def getDf(index)
 end
 
 def copyToDB(table)
-  @pgconn.exec("COPY #{table} FROM '#{table}.csv' DELIMITER ", ' CSV HEADER;')
+  @pgconn.exec("COPY #{table} FROM '/tmp/#{table}.csv' DELIMITER ',' CSV HEADER;")
 end
 
 if __FILE__ == $PROGRAM_NAME
@@ -72,9 +72,16 @@ if __FILE__ == $PROGRAM_NAME
   }
 
   tables.each do |index, table|
-    df = getDf(index)
-    df.write_csv("#{table}.csv")
-    copyToDB(table)
-    File.delete("#{table}.csv") if File.exist?("#{table}.csv")
+    begin
+      df = getDf(index)
+      df.write_csv("/tmp/#{table}.csv")
+      File.chmod(0777, "/tmp/#{table}.csv")
+      copyToDB(table)
+      File.delete("/tmp/#{table}.csv") if File.exist?("/tmp/#{table}.csv")
+    rescue Exception => e
+      puts e
+      File.delete("/tmp/#{table}.csv") if File.exist?("/tmp/#{table}.csv")
+      exit
+    end
   end
 end
