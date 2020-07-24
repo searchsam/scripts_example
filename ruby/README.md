@@ -3,7 +3,7 @@
 ## System dependencies
 
 - libpq-dev
-- libmysqlclient-dev
+- libmysqlclient-dev o libmariadb-dev
 
 ## Get credentials
 
