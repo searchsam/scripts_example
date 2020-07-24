@@ -1,4 +1,9 @@
-# Ruby
+# Ruby Daru
+
+## System dependencies
+
+- libpq-dev
+- libmysqlclient-dev
 
 ## Get credentials
 
