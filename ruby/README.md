@@ -5,7 +5,7 @@
 Copy `credentials_example.rb` into `.credentials.rb`:
 
 ```bashscript
-cp credentials_example.rb .credentials.rb
+mv credentials_example.rb .credentials.rb
 ```
 
 and fill with youru data.
