@@ -1,4 +1,6 @@
-# examples
+# Examples
+
+Comparacion entre Ruby Daru / Python Pandas / Scala Saddle
 
 ## Clone repo
 
