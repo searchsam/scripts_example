@@ -48,6 +48,10 @@ def copyToDB(table)
   @pgconn.exec("COPY #{table} FROM '/tmp/#{table}.csv' DELIMITER ',' CSV HEADER;")
 end
 
+def primaryKeySequence(table)
+    @pgconn.exec("SELECT setval(pg_get_serial_sequence('#{table}', 'id'), MAX(id)) FROM #{table};")
+end
+
 if __FILE__ == $PROGRAM_NAME
   tables = {
     0 => 'countries',
@@ -77,6 +81,7 @@ if __FILE__ == $PROGRAM_NAME
       df.write_csv("/tmp/#{table}.csv")
       #puts `cp evital_production/#{table}.csv /tmp/.`
       copyToDB(table)
+      primaryKeySequence(table)
       File.delete("/tmp/#{table}.csv") if File.exist?("/tmp/#{table}.csv")
     rescue Exception => e
       puts e
