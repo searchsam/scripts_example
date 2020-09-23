@@ -36,7 +36,8 @@ def getQuery(queryIndex)
     14 => 'SELECT id, CAST(health AS UNSIGNED) AS health, risk_category AS risk, session_id, created_at, updated_at FROM health_states ORDER BY created_at ASC;',
     15 => 'SELECT id, comments, friday_breakfast, friday_dinner, friday_lunch, friday_snack_dinner, friday_snack_lunch, friday_snack, monday_breakfast, monday_dinner, monday_lunch, monday_snack_dinner, monday_snack_lunch, monday_snack, saturday_breakfast, saturday_dinner, saturday_lunch, saturday_snack_dinner, saturday_snack_lunch, saturday_snack, sunday_breakfast, sunday_dinner, sunday_lunch, sunday_snack_dinner, sunday_snack_lunch, sunday_snack, thursday_breakfast, thursday_dinner, thursday_lunch, thursday_snack_dinner, thursday_snack_lunch, thursday_snack, tuesday_breakfast, tuesday_dinner, tuesday_lunch, tuesday_snack_dinner, tuesday_snack_lunch, tuesday_snack, wednesday_breakfast, wednesday_dinner, wednesday_lunch, wednesday_snack_dinner, wednesday_snack_lunch, wednesday_snack, examination_id, created_at, updated_at FROM nutritional_plans WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
     16 => 'SELECT id, plan, reason_attention AS reason, examination_id, created_at, updated_at FROM soaps WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
-    17 => 'SELECT id, actividad AS activity, anxiety_food, culpability, diag_diabetes AS diabetes, eat_out_frecuency, frecuencia_ejercicio AS exercise_frequency, salud AS health, diag_heart AS heart, altura AS height, imc, animo AS mind, non_pathological_background, situation, cintura AS waist, peso AS weight, examination_id, created_at, updated_at FROM nutrimind_tests WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;'
+    17 => 'SELECT id, actividad AS activity, anxiety_food, culpability, diag_diabetes AS diabetes, eat_out_frecuency, frecuencia_ejercicio AS exercise_frequency, salud AS health, diag_heart AS heart, altura AS height, imc, animo AS mind, non_pathological_background, situation, cintura AS waist, peso AS weight, examination_id, created_at, updated_at FROM nutrimind_tests WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    18 => 'SELECT id, activities, examination_id, created_at, updated_at FROM psychological_plans WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;'
   }[queryIndex]
 end
 
@@ -46,6 +47,12 @@ end
 
 def copyToDB(table)
   @pgconn.exec("COPY #{table} FROM '/tmp/#{table}.csv' DELIMITER ',' CSV HEADER;")
+end
+
+def setSessionRisk
+    @pgconn.exec("WITH session_risks AS (SELECT sessions.id AS sessionid, CASE WHEN emotional_states.risk = 3 THEN 3 WHEN health_states.risk = 3 THEN 3 WHEN waist_widths.risk = 3 THEN 3 ELSE body_mass_indices.risk END AS sessionrisk FROM sessions, body_mass_indices, emotional_states, health_states, waist_widths WHERE body_mass_indices.session_id = sessions.id AND emotional_states.session_id = sessions.id AND health_states.session_id = sessions.id AND waist_widths.session_id = sessions.id ) UPDATE sessions SET risk = session_risks.sessionrisk FROM session_risks WHERE sessions.id = session_risks.sessionid;")
+    
+    @pgconn.exec("UPDATE sessions SET risk = body_mass_indices.risk FROM body_mass_indices WHERE sessions.id = body_mass_indices.session_id AND sessions.risk = 0;")
 end
 
 def primaryKeySequence(table)
@@ -71,7 +78,8 @@ if __FILE__ == $PROGRAM_NAME
     14 => 'health_states',
     15 => 'nutritional_plans',
     16 => 'soaps',
-    17 => 'nutrimind_tests'
+    17 => 'nutrimind_tests',
+    18 => 'psychological_plans'
   }
 
   tables.each do |index, table|
@@ -88,5 +96,8 @@ if __FILE__ == $PROGRAM_NAME
       File.delete("/tmp/#{table}.csv") if File.exist?("/tmp/#{table}.csv")
       exit
     end
+  end
+  begin
+    setSessionRisk
   end
 end
