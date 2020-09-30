@@ -37,7 +37,16 @@ def getQuery(queryIndex)
     15 => 'SELECT id, comments, friday_breakfast, friday_dinner, friday_lunch, friday_snack_dinner, friday_snack_lunch, friday_snack, monday_breakfast, monday_dinner, monday_lunch, monday_snack_dinner, monday_snack_lunch, monday_snack, saturday_breakfast, saturday_dinner, saturday_lunch, saturday_snack_dinner, saturday_snack_lunch, saturday_snack, sunday_breakfast, sunday_dinner, sunday_lunch, sunday_snack_dinner, sunday_snack_lunch, sunday_snack, thursday_breakfast, thursday_dinner, thursday_lunch, thursday_snack_dinner, thursday_snack_lunch, thursday_snack, tuesday_breakfast, tuesday_dinner, tuesday_lunch, tuesday_snack_dinner, tuesday_snack_lunch, tuesday_snack, wednesday_breakfast, wednesday_dinner, wednesday_lunch, wednesday_snack_dinner, wednesday_snack_lunch, wednesday_snack, examination_id, created_at, updated_at FROM nutritional_plans WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
     16 => 'SELECT id, plan, reason_attention AS reason, examination_id, created_at, updated_at FROM soaps WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
     17 => 'SELECT id, actividad AS activity, anxiety_food, culpability, diag_diabetes AS diabetes, eat_out_frecuency, frecuencia_ejercicio AS exercise_frequency, salud AS health, diag_heart AS heart, altura AS height, imc, animo AS mind, non_pathological_background, situation, cintura AS waist, peso AS weight, examination_id, created_at, updated_at FROM nutrimind_tests WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
-    18 => 'SELECT id, activities, examination_id, created_at, updated_at FROM psychological_plans WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;'
+    18 => 'SELECT id, activities, examination_id, created_at, updated_at FROM psychological_plans WHERE examination_id IN (SELECT id FROM examinations WHERE doctor_id IS NOT NULL AND doctor_id IN (SELECT id FROM doctors WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    19 => 'SELECT id, CASE WHEN bad_in_morning = "si" THEN TRUE WHEN bad_in_morning = "no" THEN FALSE ELSE NULL END AS bad_in_morning, CASE WHEN lost_concentration = "si" THEN TRUE WHEN lost_concentration = "no" THEN FALSE ELSE NULL END AS lost_concentration, CASE WHEN lost_confidence = "si" THEN TRUE WHEN lost_confidence = "no" THEN FALSE ELSE NULL END AS lost_confidence, CASE WHEN lost_hope = "si" THEN TRUE WHEN lost_hope = "no" THEN FALSE ELSE NULL END AS lost_hope, CASE WHEN lost_interest = "si" THEN TRUE WHEN lost_interest = "no" THEN FALSE ELSE NULL END AS lost_interest, CASE WHEN lost_weight = "si" THEN TRUE WHEN lost_weight = "no" THEN FALSE ELSE NULL END AS lost_weight, CASE WHEN low_energy = "si" THEN TRUE WHEN low_energy = "no" THEN FALSE ELSE NULL END AS low_energy, CASE WHEN result = "Ansiedad" THEN TURE WHEN result = "Normal" THEN FALSE ELSE NULL END AS result, CASE WHEN slowed = "si" THEN TRUE WHEN slowed = "no" THEN FALSE ELSE NULL END AS slowed, time_spent, CASE WHEN wake_up_early = "si" THEN TRUE WHEN wake_up_early = "no" THEN FALSE ELSE NULL END AS wake_up_early, session_id, created_at, updated_at FROM anxiety_tests WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    20 => 'SELECT id, diastolic_value, CASE WHEN result = "Presión Sanguínea Óptima" THEN 1 WHEN result = "Presión Sanguínea Normal" THEN 2 WHEN result = "Presión Sanguínea Alta" THEN 3 WHEN result = "Presión Sanguínea Normal Alta" THEN 4 WHEN result = "Presión Baja (Rango Normal Para Atletas y Niños)" THEN 5 WHEN result = "Presión Sanguínea Baja" THEN 6 ELSE NULL END AS result, systolic_value, time_spent, session_id, created_at, updated_at FROM blood_pressures WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    21 => 'SELECT id, interpretation, time_spent, session_id, created_at, updated_at from cardiogramas WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    22 => 'SELECT id, level, recomendation, CASE WHEN result = "Normal" THEN FALSE WHEN result = "Elevado" THEN TRUE WHEN result = "<h3 style="color: green;">Normal</h3>" THEN FALSE WHEN result = "<h3 style="color: red;">Elevado</h3>" THEN TRUE ELSE NULL END AS result, time_spent, session_id, created_at, updated_at FROM cholesterol_levels WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    23 => 'SELECT id, feel_culpability, feel_infamous, feel_pointless, feel_sad, feel_unhappy, feel_useless, no_pleasure, really_am, CASE WHEN result = "Soportable" THEN 1 WHEN result = "Normal" THEN 2 WHEN result = "Depresion" THEN 3 WHEN result = "Depresion mayor" THEN 4 ELSE NULL END AS result, spoil, time_spent, session_id, created_at, updated_at FROM depression_tests WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    24 => 'SELECT CASE WHEN ayuna = 1 THEN TRUE WHEN ayuna = 0 THEN FALSE ELSE NULL END AS fast, level, recomendation, CASE WHEN result = "Nivel óptimo" THEN TRUE WHEN result = "Nivel no óptimo" THEN FALSE WHEN result = "<h4 style="color: green;">Nivel óptimo</h4>" THEN TRUE WHEN result = "<h4 style="color: red;">Nivel no óptimo</h4>" THEN FALSE ELSE NULL END AS result, time_spent, session_id, created_at, updated_at FROM glucose_levels WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    25 => 'SELECT id, gmdl, hct, recomendation, CASE WHEN result = "Nivel Bajo" THEN 1 WHEN result = "Normal" THEN 2 WHEN result = "Elevado" THEN 3 ELSE NULL END AS result, time_spent, session_id, created_at, updated_at FROM hemoglobins WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    26 => 'SELECT id, fevone, fevoneratio, pkf, recomendation, CASE WHEN result = "Resultado moderado" THEN 1 WHEN result = "Nivel normal" THEN 2 WHEN result = "Resultado Severo" THEN 3 WHEN result = "<h3 style="color: green;">Nivel normal</h3>" THEN 2 WHEN result = "<h3 style="color: red">Resultado moderado</h3>" THEN 1 ELSE NULL END AS result, total_lm, session_id, created_at, updated_at FROM spirometers WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
+    27 => 'SELECT id, level, recomendation, CASE WHEN result = "Elevado" THEN TRUE WHEN result = "<h3 id="exam_bad_result">Elevado</h4>" THEN TRUE WHEN result = "Normal" THEN FALSE WHEN result = "<h3 style="color: green;">Normal</h3>" THEN FALSE ELSE NULL END AS result, time_spent, session_id, created_at, updated_at FROM triglyceride_levels WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;'
   }[queryIndex]
 end
 
@@ -79,7 +88,16 @@ if __FILE__ == $PROGRAM_NAME
     15 => 'nutritional_plans',
     16 => 'soaps',
     17 => 'nutrimind_tests',
-    18 => 'psychological_plans'
+    18 => 'psychological_plans',
+    19 => 'anxiety_tests',
+    20 => 'blood_pressures',
+    21 => 'cardiogramas',
+    22 => 'cholesterol_levels',
+    23 => 'depression_tests',
+    24 => 'glucose_levels',
+    25 => 'hemoglobins',
+    26 => 'spirometers',
+    27 => 'triglyceride_levels'
   }
 
   tables.each do |index, table|
@@ -98,6 +116,7 @@ if __FILE__ == $PROGRAM_NAME
     end
   end
   begin
+    primaryKeySequence('users')
     setSessionRisk
   end
 end
