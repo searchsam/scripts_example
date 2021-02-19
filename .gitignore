@@ -57,3 +57,7 @@ build-iPhoneSimulator/
 
 # Archivo de credenciales
 /ruby/.credentials.rb
+/ruby/Gemfile.lock
+/python/.venv
+/python/.env
+/python/clean_db.py

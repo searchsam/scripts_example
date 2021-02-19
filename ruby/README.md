@@ -2,8 +2,15 @@
 
 ## System dependencies
 
+### Mageia
+
 - libpq-dev
 - libmysqlclient-dev o libmariadb-dev
+
+### Fedora
+
+- libpq-devel
+- community-mysql-devel o mariadb-devel
 
 ## Get credentials
 
