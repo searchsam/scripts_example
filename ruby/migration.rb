@@ -1,4 +1,5 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
+# frozen_string_literal: true
 
 require 'daru'
 require 'mysql2'
@@ -17,7 +18,7 @@ require_relative '.credentials'
   user: Credentials::PG_USER
 )
 
-def getQuery(queryIndex)
+def get_query(index)
   {
     0 => 'SELECT users.id, "505" AS area_code, users.auth_token, people.birth_date as birthday, users.current_sign_in_at, users.current_sign_in_ip, NULL AS device_id, users.email, users.encrypted_password, NULL AS firebase_id, users.last_sign_in_at, users.last_sign_in_ip, users.passwd_login, people.phone_number AS phone, NULL AS provider, users.remember_created_at, users.reset_password_sent_at, users.reset_password_token, CASE WHEN users.role = "admin" THEN 1 WHEN users.role = "general" THEN 2 WHEN users.role = "doctor" THEN 3 WHEN users.role = "employee" THEN 4 WHEN users.role = "evaluator" THEN 5 ELSE NULL END AS role, users.sign_in_count, users.created_at, users.updated_at FROM users, people WHERE people.user_id = users.id ORDER BY users.created_at ASC;',
     1 => 'SELECT people.id, NULL AS age, people.last_name, people.name, CASE WHEN people.is_male = 1 THEN TRUE WHEN people.is_male = 0 THEN FALSE ELSE NULL END AS sex, users.stripe_id, users.stripe_subscription_id, people.user_id, people.created_at, people.updated_at FROM people, users WHERE people.user_id = users.id AND people.user_id IS NOT NULL ORDER BY people.created_at ASC;',
@@ -40,24 +41,24 @@ def getQuery(queryIndex)
     18 => 'SELECT id, fevone, fevoneratio, pkf, recomendation, CASE WHEN result = "Nivel normal" THEN 1 WHEN result = "Resultado moderado" THEN 2 WHEN result = "Resultado Severo" THEN 3 WHEN result = "<h3 style=\"color: green;\">Nivel normal</h3>" THEN 1 WHEN result = "<h3 style=\"color: red\">Resultado moderado</h3>" THEN 2 ELSE NULL END AS result, CAST(total_lm AS UNSIGNED) AS total_lm, session_id, created_at, updated_at FROM spirometers WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
     19 => 'SELECT id, CAST(level AS UNSIGNED) level, recomendation, CASE WHEN result = "Elevado" THEN 2 WHEN result = "<h3 id=\"exam_bad_result\">Elevado</h4>" THEN 2 WHEN result = "Normal" THEN 1 WHEN result = "<h3 style=\"color: green;\">Normal</h3>" THEN 1 ELSE NULL END AS result, time_spent, session_id, created_at, updated_at FROM triglyceride_levels WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;',
     20 => 'SELECT id, CASE WHEN hypertension = 1 THEN TRUE WHEN hypertension = 0 THEN FALSE ELSE NULL END AS hypertension, recomendation, CASE WHEN result = "Normal" THEN FALSE WHEN result = "Hay posibilidades de padecer un trastorno respiratorio durante el sueño" THEN TRUE ELSE NULL END AS result, CASE WHEN sleep_driving = 1 THEN TRUE WHEN sleep_driving = 0 THEN FALSE ELSE NULL END AS sleep_driving, CASE WHEN sleep_driving_frecuence = "Casi nunca o nunca" THEN 0 WHEN sleep_driving_frecuence = "1 a 2 veces por semana" THEN 1 WHEN sleep_driving_frecuence = "3 a 4 veces por semana" THEN 2 WHEN sleep_driving_frecuence = "1 a 2 veces por mes" THEN 3 WHEN sleep_driving_frecuence = "casi todos los dias" THEN 4 WHEN sleep_driving_frecuence = "no aplica" THEN NULL ELSE NULL END AS sleep_driving_frecuence, CASE WHEN snore = "false" THEN 1 WHEN snore = "true" THEN 0 WHEN snore = "no" THEN 1 WHEN snore = "si" THEN 0 WHEN snore = "no lo se" THEN 2 ELSE NULL END AS snore, CASE WHEN snore_disturb = 1 THEN FALSE WHEN snore_disturb = 0 THEN TRUE ELSE NULL END AS snore_disturb, CASE WHEN snore_frecuence = "Casi nunca o nunca" THEN 0 WHEN snore_frecuence = "1 a 2 veces por semana" THEN 1 WHEN snore_frecuence = "3 a 4 veces por semana" THEN 2 WHEN snore_frecuence = "1 a 2 veces por mes" THEN 3 WHEN snore_frecuence = "Casi todos los dias" THEN 4 WHEN snore_frecuence = "no aplica" THEN NULL ELSE NULL END AS snore_frecuence, CASE WHEN snore_volume = "Respiración Fuerte" THEN 0 WHEN snore_volume = "tan alto como una conversacion" THEN 1 WHEN snore_volume = "mas alto que una conversacion" THEN 2 WHEN snore_volume = "muy alto, se puede escuchar desde habitaciones vecinas" THEN 3 WHEN snore_volume = "no aplica" THEN NULL ELSE NULL END AS snore_volume, CASE WHEN stop_breathing = "Casi nunca o nunca" THEN 0 WHEN stop_breathing = "1 a 2 veces por semana" THEN 1 WHEN stop_breathing = "3 a 4 veces por semana" THEN 2 WHEN stop_breathing = "1 a 2 veces por mes" THEN 3 WHEN stop_breathing = "Casi todos los dias" THEN 4 WHEN stop_breathing = "no aplica" THEN NULL ELSE NULL END AS stop_breathing, time_spent, CASE WHEN tired_day = "casi nunca o nunca" THEN 0 WHEN tired_day = "1 a 2 veces por semana" THEN 1 WHEN tired_day = "3 a 4 veces por semana" THEN 2 WHEN tired_day = "1 a 2 veces por mes" THEN 3 WHEN tired_day = "Casi todos los dias" THEN 4 WHEN tired_day = "no aplica" THEN NULL ELSE NULL END AS tired_day, CASE WHEN wake_up_tired = "casi nunca o nunca" THEN 0 WHEN wake_up_tired = "1 a 2 veces por semana" THEN 1 WHEN wake_up_tired = "3 a 4 veces por semana" THEN 2 WHEN wake_up_tired = "1 a 2 veces por mes" THEN 3 WHEN wake_up_tired = "Casi todos los dias" THEN 4 WHEN wake_up_tired = "no aplica" THEN NULL ELSE NULL END AS wake_up_tired, session_id, created_at, updated_at FROM dreams WHERE session_id IS NOT NULL AND session_id IN (SELECT id FROM sessions WHERE person_id IN (SELECT id FROM people WHERE user_id IS NOT NULL)) ORDER BY created_at ASC;'
-  }[queryIndex]
+  }[index]
 end
 
-def getDf(index)
-  Daru::DataFrame.new(@myclient.query(getQuery(index)).to_a)
+def get_df(index)
+  Daru::DataFrame.new(@myclient.query(get_query(index)).to_a)
 end
 
-def copyToDB(table)
+def copy_to_db(table)
   @pgconn.exec("COPY #{table} FROM '/tmp/#{table}.csv' DELIMITER ',' CSV HEADER;")
 end
 
-def setSessionRisk
-  @pgconn.exec("WITH session_risks AS (SELECT sessions.id AS sessionid, CASE WHEN emotional_states.risk = 3 THEN 3 WHEN health_states.risk = 3 THEN 3 WHEN waist_widths.risk = 3 THEN 3 ELSE body_mass_indices.risk END AS sessionrisk FROM sessions, body_mass_indices, emotional_states, health_states, waist_widths WHERE body_mass_indices.session_id = sessions.id AND emotional_states.session_id = sessions.id AND health_states.session_id = sessions.id AND waist_widths.session_id = sessions.id ) UPDATE sessions SET risk = session_risks.sessionrisk FROM session_risks WHERE sessions.id = session_risks.sessionid;")
+def set_session_risk
+  @pgconn.exec('WITH session_risks AS (SELECT sessions.id AS sessionid, CASE WHEN emotional_states.risk = 3 THEN 3 WHEN health_states.risk = 3 THEN 3 WHEN waist_widths.risk = 3 THEN 3 ELSE body_mass_indices.risk END AS sessionrisk FROM sessions, body_mass_indices, emotional_states, health_states, waist_widths WHERE body_mass_indices.session_id = sessions.id AND emotional_states.session_id = sessions.id AND health_states.session_id = sessions.id AND waist_widths.session_id = sessions.id ) UPDATE sessions SET risk = session_risks.sessionrisk FROM session_risks WHERE sessions.id = session_risks.sessionid;')
 
-  @pgconn.exec("UPDATE sessions SET risk = body_mass_indices.risk FROM body_mass_indices WHERE sessions.id = body_mass_indices.session_id AND sessions.risk = 0;")
+  @pgconn.exec('UPDATE sessions SET risk = body_mass_indices.risk FROM body_mass_indices WHERE sessions.id = body_mass_indices.session_id AND sessions.risk = 0;')
 end
 
-def primaryKeySequence(table)
+def primary_key_sequence(table)
   @pgconn.exec("SELECT setval(pg_get_serial_sequence('#{table}', 'id'), MAX(id)) FROM #{table};")
 end
 
@@ -89,20 +90,20 @@ if __FILE__ == $PROGRAM_NAME
   tables.each do |index, table|
     puts table
     begin
-      df = getDf(index)
+      df = get_df(index)
       df.write_csv("/tmp/#{table}.csv")
       # puts `cp evital_production/#{table}.csv /tmp/.`
-      copyToDB(table)
-      primaryKeySequence(table)
+      copy_to_db(table)
+      primary_key_sequence(table)
       File.delete("/tmp/#{table}.csv") if File.exist?("/tmp/#{table}.csv")
-    rescue Exception => e
+    rescue StandardError => e
       puts e
       File.delete("/tmp/#{table}.csv") if File.exist?("/tmp/#{table}.csv")
       exit
     end
   end
-  begin
-    primaryKeySequence('users')
-    setSessionRisk
-  end
+
+  primary_key_sequence('users')
+  set_session_risk
+
 end
