@@ -191,5 +191,3 @@ if __name__ == "__main__":
                 os.remove("/tmp/{}.csv".format(table))
 
             exit()
-
-    primaryKeySequence("users")
