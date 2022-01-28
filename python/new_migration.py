@@ -27,13 +27,19 @@ PG_CONN_DEV = psycopg2.connect(
         password=os.getenv("PG_PASS_DEV"),
         port=os.getenv("PG_PORT_DEV"),
     )
-)
+).cursor()
 
 
 def getQuery(queryIndex):
     return {
         0: "SELECT users.id, users.area_code, users.birthday, users.email, users.encrypted_password, users.firebase_id, CASE WHEN patients.sex IS TRUE THEN 1 ELSE 2 END as gender, patients.last_name, patients.name, users.passwd_login, users.phone, patients.stripe_id, patients.stripe_subscription_id, users.role as role_id, users.created_at, users.updated_at FROM users, patients WHERE patients.user_id = users.id ORDER BY users.created_at ASC;",
         1: "SELECT users.id, users.area_code, coaches.available, users.birthday, users.email, users.encrypted_password, users.firebase_id, CASE WHEN coaches.sex IS TRUE THEN 1 ELSE 2 END as gender, coaches.last_name, coaches.name, users.passwd_login, users.phone, users.role as role_id, users.created_at, users.updated_at FROM users, coaches WHERE coaches.user_id = users.id ORDER BY users.created_at ASC;",
+        2: "SELECT id, device_id, user_id FROM users ORDER BY users.created_at ASC;",
+        3: "SELECT id, provider, user_id FROM users ORDER BY users.created_at ASC;",
+        4: "SELECT id, goal, user_id AS patient_id, created_at, updated_at FROM goals ORDER BY goals.created_at ASC;",
+        5: "SELECT diagnostics.id, diagnostics.diagnostic, patients.user_id AS patient_id, diagnostics.created_at, diagnostics.updated_at FROM diagnostics, patients where patients.id = diagnostics.patient_id ORDER BY diagnostics.created_at ASC;",
+        6: "SELECT id, answer, question, diagnostic_id, created_at, updated_at FROM questions ORDER BY created_at ASC;",
+        7: "SELECT id, comment, examination_id, created_at, updated_at FROM nutritional_plans ORDER BY created_at ASC;",
     }[queryIndex]
 
 
@@ -62,7 +68,7 @@ def copyToDB(table, cols):
 
 
 def primaryKeySequence(table):
-    PG_CONN_DEV.cursor().execute(
+    PG_CONN_DEV.execute(
         "SELECT setval(pg_get_serial_sequence('{table}', 'id'), MAX(id)) FROM {table};".format(
             table=table
         )
@@ -71,7 +77,17 @@ def primaryKeySequence(table):
 
 
 if __name__ == "__main__":
-    tables = {0: "users", 1: "users", 2: "devices"}
+    tables = {
+        # 0: "users",
+        # 1: "users",
+        # 2: "devices",
+        # 3: "sessions",
+        # 4: "goals",
+        # 5: "diagnostics",
+        # 6: "questions",
+        # 7: "nutritional_plans",
+        8: "plan_days",
+    }
 
     for index, table in tables.items():
         try:
